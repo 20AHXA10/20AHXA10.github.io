@@ -8,7 +8,51 @@
     <link rel="stylesheet" href="/admin/styles.css" />
   </head>
   <body class="admin-body">
-    <div class="admin-shell">
+    <div id="loginView" class="auth-shell">
+      <div class="auth-card">
+        <p class="eyebrow">博客后台</p>
+        <h1>GitHub 仓库登录</h1>
+        <p class="auth-subtitle">
+          使用 GitHub Personal Access Token 连接博客仓库，并把文章内容保存到真实仓库中。
+        </p>
+
+        <form id="loginForm" class="auth-form">
+          <label>
+            <span>GitHub Token</span>
+            <input id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxx" />
+          </label>
+
+          <label>
+            <span>仓库所有者</span>
+            <input id="ownerInput" type="text" value="20AHXA10" />
+          </label>
+
+          <label>
+            <span>仓库名称</span>
+            <input id="repoInput" type="text" value="20AHXA10.github.io" />
+          </label>
+
+          <div class="two-col">
+            <label>
+              <span>分支</span>
+              <input id="branchInput" type="text" value="main" />
+            </label>
+            <label>
+              <span>数据文件</span>
+              <input id="pathInput" type="text" value="data/posts.json" />
+            </label>
+          </div>
+
+          <button class="primary-btn full-width" type="submit">连接仓库</button>
+        </form>
+
+        <p id="loginStatus" class="status-text">
+          请先提供 GitHub Token，推荐使用 repo 权限的 Classic PAT。
+        </p>
+      </div>
+    </div>
+
+    <div id="adminView" class="admin-shell hidden">
       <aside class="admin-sidebar">
         <div class="brand-block">
           <div class="brand-mark">A</div>
@@ -21,14 +65,13 @@
         <nav class="admin-nav" aria-label="后台导航">
           <button class="nav-item active" type="button">概览</button>
           <button class="nav-item" type="button">文章</button>
-          <button class="nav-item" type="button">分类</button>
           <button class="nav-item" type="button">设置</button>
         </nav>
 
         <div class="sidebar-card">
-          <span class="small-label">状态</span>
-          <strong>在线编辑</strong>
-          <small>数据保存在浏览器本地</small>
+          <span class="small-label">连接状态</span>
+          <strong id="connectionStatus">已连接</strong>
+          <small id="repoSummary">owner/repo</small>
         </div>
       </aside>
 
@@ -39,6 +82,7 @@
             <h1>内容管理</h1>
           </div>
           <div class="header-actions">
+            <button type="button" class="secondary-btn" id="logoutBtn">退出登录</button>
             <a href="/" class="ghost-btn">返回博客</a>
             <button type="button" class="primary-btn" id="newPostBtn">新建文章</button>
           </div>
@@ -124,7 +168,10 @@
         <section class="list-panel panel">
           <div class="panel-header">
             <h2>文章列表</h2>
-            <span id="listSummary" class="small-label">0 篇文章</span>
+            <div class="panel-actions">
+              <button type="button" class="secondary-btn" id="syncBtn">同步到 GitHub</button>
+              <span id="listSummary" class="small-label">0 篇文章</span>
+            </div>
           </div>
           <div id="postList" class="post-list" aria-live="polite"></div>
         </section>
