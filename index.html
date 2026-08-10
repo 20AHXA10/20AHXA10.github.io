@@ -15,6 +15,72 @@
 <meta name="twitter:title" content="Aguagua">
 <meta name="twitter:description" content="演示说明"><link rel="alternate" type="application/rss&#43;xml" href="https://20AHXA10.github.io/index.xml">
     <link rel="shortcut icon" href="/favicon.ico" />
+    <style>
+        .blog-empty-state {
+            padding: 32px 12px;
+            text-align: center;
+            color: #5d6a7c;
+            background: rgba(255,255,255,0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(148,163,184,0.18);
+        }
+
+        .blog-detail {
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(148,163,184,0.18);
+            border-radius: 22px;
+            padding: 28px 24px;
+        }
+
+        .blog-detail-header {
+            margin-bottom: 16px;
+        }
+
+        .blog-backlink {
+            display: inline-block;
+            margin-bottom: 12px;
+            color: #3467eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .blog-content {
+            line-height: 1.9;
+            color: #1f2a37;
+        }
+
+        .blog-content h1,
+        .blog-content h2,
+        .blog-content h3,
+        .blog-content h4 {
+            margin-top: 1.4em;
+            margin-bottom: 0.7em;
+        }
+
+        .blog-content p,
+        .blog-content ul,
+        .blog-content ol,
+        .blog-content blockquote {
+            margin: 0 0 1em;
+        }
+
+        .blog-content ul,
+        .blog-content ol {
+            padding-left: 1.5em;
+        }
+
+        .blog-content blockquote {
+            padding-left: 12px;
+            border-left: 4px solid #dfe7ff;
+            color: #4b5563;
+        }
+
+        .blog-content code {
+            background: rgba(52, 103, 235, 0.08);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+    </style>
 
     </head>
     <body class="">
@@ -359,121 +425,7 @@
     
     
 
-    <section class="article-list">
-        
-            
-<article class="">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/%E6%B8%B8%E8%AE%B0/" >
-                游记
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/2024csp%E6%B8%B8%E8%AE%B0/">2024CSP游记</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            emm...邮寄了
-        </h3>
-        
-    </div>
-
-    
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">2024-09-22</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-</article>
-        
-            
-<article class="">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/%E6%B5%8B%E8%AF%95/" >
-                测试
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/csblog/">CsBlog</a>
-        </h2>
-    
-        
-    </div>
-
-    
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">2024-08-17</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-</article>
-        
-    </section>
+    <section class="article-list" id="articleList"></section>
 <footer class="site-footer">
     <section class="copyright">
         &copy; 
@@ -494,6 +446,7 @@
                 
                 >
             </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script src="/js/blog-data.js" defer></script>
 <script>
     (function () {
         const customFont = document.createElement('link');
