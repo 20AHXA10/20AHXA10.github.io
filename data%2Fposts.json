@@ -22,7 +22,7 @@
     "title": "CsBlog",
     "subtitle": "",
     "category": "测试",
-    "status": "draft",
+    "status": "published",
     "date": "2024-08-17",
     "content": "## CsBlog\n\n这是一个用于测试博客后台的示例文章。\n\n- 可编辑标题\n- 可切换状态\n- 可预览内容\n\n> 后台现在可以同步到 GitHub 仓库。"
   }
