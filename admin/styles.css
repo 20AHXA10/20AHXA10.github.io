@@ -34,6 +34,93 @@ button {
   border: none;
 }
 
+.hidden {
+  display: none !important;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: min(100%, 560px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  padding: 32px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.auth-card h1 {
+  margin: 12px 0 10px;
+  font-size: 2rem;
+}
+
+.auth-subtitle {
+  margin: 0 0 22px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+input, textarea, select {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 12px 14px;
+  color: var(--text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: rgba(52, 103, 235, 0.65);
+  box-shadow: 0 0 0 3px rgba(52, 103, 235, 0.1);
+}
+
+.full-width {
+  width: 100%;
+}
+
+.status-text {
+  margin-top: 18px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.status-text.error {
+  color: var(--danger);
+}
+
+.status-text.success {
+  color: var(--success);
+}
+
 .admin-body {
   min-height: 100vh;
   padding: 24px;
@@ -78,14 +165,6 @@ button {
   background: linear-gradient(135deg, #7ea7ff, #5266ff);
   font-weight: 700;
   color: white;
-}
-
-.eyebrow {
-  margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.7;
 }
 
 .brand-block h2 {
@@ -246,6 +325,7 @@ button {
 .panel-actions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .editor-grid {
@@ -259,30 +339,6 @@ button {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: var(--text);
-  font-weight: 600;
-}
-
-input, textarea, select {
-  width: 100%;
-  border: 1px solid rgba(148, 163, 184, 0.28);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  padding: 12px 14px;
-  color: var(--text);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-input:focus, textarea:focus, select:focus {
-  outline: none;
-  border-color: rgba(52, 103, 235, 0.65);
-  box-shadow: 0 0 0 3px rgba(52, 103, 235, 0.1);
 }
 
 textarea {
