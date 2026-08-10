@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>博客后台</title>
+    <meta name="description" content="博客后台管理界面" />
+    <link rel="stylesheet" href="/admin/styles.css" />
+  </head>
+  <body class="admin-body">
+    <div class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="brand-block">
+          <div class="brand-mark">A</div>
+          <div>
+            <p class="eyebrow">博客后台</p>
+            <h2>Aguagua</h2>
+          </div>
+        </div>
+
+        <nav class="admin-nav" aria-label="后台导航">
+          <button class="nav-item active" type="button">概览</button>
+          <button class="nav-item" type="button">文章</button>
+          <button class="nav-item" type="button">分类</button>
+          <button class="nav-item" type="button">设置</button>
+        </nav>
+
+        <div class="sidebar-card">
+          <span class="small-label">状态</span>
+          <strong>在线编辑</strong>
+          <small>数据保存在浏览器本地</small>
+        </div>
+      </aside>
+
+      <main class="admin-main">
+        <header class="admin-header">
+          <div>
+            <p class="eyebrow">控制台</p>
+            <h1>内容管理</h1>
+          </div>
+          <div class="header-actions">
+            <a href="/" class="ghost-btn">返回博客</a>
+            <button type="button" class="primary-btn" id="newPostBtn">新建文章</button>
+          </div>
+        </header>
+
+        <section class="stats-grid" aria-label="统计信息">
+          <article class="stat-card">
+            <span class="small-label">总文章</span>
+            <strong id="statTotal">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="small-label">已发布</span>
+            <strong id="statPublished">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="small-label">草稿</span>
+            <strong id="statDrafts">0</strong>
+          </article>
+          <article class="stat-card">
+            <span class="small-label">分类</span>
+            <strong id="statCategories">0</strong>
+          </article>
+        </section>
+
+        <section class="editor-panel panel">
+          <div class="panel-header">
+            <h2>文章编辑器</h2>
+            <div class="panel-actions">
+              <button type="button" class="secondary-btn" id="resetFormBtn">清空</button>
+              <button type="button" class="primary-btn" id="saveBtn">保存文章</button>
+            </div>
+          </div>
+
+          <div class="editor-grid">
+            <div class="form-column">
+              <label>
+                <span>标题</span>
+                <input id="postTitle" type="text" placeholder="输入文章标题" />
+              </label>
+
+              <div class="two-col">
+                <label>
+                  <span>分类</span>
+                  <input id="postCategory" type="text" placeholder="例如：游记" />
+                </label>
+                <label>
+                  <span>状态</span>
+                  <select id="postStatus">
+                    <option value="published">已发布</option>
+                    <option value="draft">草稿</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                <span>副标题</span>
+                <input id="postSubtitle" type="text" placeholder="可选" />
+              </label>
+
+              <label>
+                <span>发布日期</span>
+                <input id="postDate" type="date" />
+              </label>
+
+              <label>
+                <span>文章内容</span>
+                <textarea id="postContent" rows="14" placeholder="开始写内容..."></textarea>
+              </label>
+            </div>
+
+            <div class="preview-column">
+              <div class="preview-header">
+                <h3>预览</h3>
+                <span id="previewLabel">草稿</span>
+              </div>
+              <article class="preview-card" id="previewContent">
+                <p>写点内容后，这里会实时预览。</p>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="list-panel panel">
+          <div class="panel-header">
+            <h2>文章列表</h2>
+            <span id="listSummary" class="small-label">0 篇文章</span>
+          </div>
+          <div id="postList" class="post-list" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/admin/app.js"></script>
+  </body>
+</html>
