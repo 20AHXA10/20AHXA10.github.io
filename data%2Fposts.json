@@ -1,0 +1,20 @@
+[
+  {
+    "id": "post-1",
+    "title": "2024CSP游记",
+    "subtitle": "emm...邮寄了",
+    "category": "游记",
+    "status": "published",
+    "date": "2024-09-22",
+    "content": "## 2024CSP游记\n\nCSP 2024 的经历还记得很清晰，心情复杂而充满期待。\n\n- 报名阶段：认真准备，反复检查系统。\n- 考试当天：紧张但有条不紊。\n- 之后：结果不如预期，但也学到了很多。\n\n**感想**：只要认真参与，每一次经历都会变成宝贵的经验。"
+  },
+  {
+    "id": "post-2",
+    "title": "CsBlog",
+    "subtitle": "",
+    "category": "测试",
+    "status": "draft",
+    "date": "2024-08-17",
+    "content": "## CsBlog\n\n这是一个用于测试博客后台的示例文章。\n\n- 可编辑标题\n- 可切换状态\n- 可预览内容\n\n> 后台现在可以同步到 GitHub 仓库。"
+  }
+]
