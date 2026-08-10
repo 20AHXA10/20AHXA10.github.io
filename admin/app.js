@@ -1,6 +1,13 @@
-const STORAGE_KEY = 'aguagua-blog-admin-posts';
+const STORAGE_KEY = 'aguagua-admin-session-v2';
+const DEFAULT_CONFIG = {
+  owner: '20AHXA10',
+  repo: '20AHXA10.github.io',
+  branch: 'main',
+  path: 'data/posts.json',
+  token: ''
+};
 
-const defaultPosts = [
+const DEFAULT_POSTS = [
   {
     id: 'post-1',
     title: '2024CSP游记',
@@ -17,14 +24,29 @@ const defaultPosts = [
     category: '测试',
     status: 'draft',
     date: '2024-08-17',
-    content: '## CsBlog\n\n这是一个用于测试博客后台的示例文章。\n\n- 可编辑标题\n- 可切换状态\n- 可预览内容\n\n> 后台是静态界面，数据会保存在浏览器本地。'
+    content: '## CsBlog\n\n这是一个用于测试博客后台的示例文章。\n\n- 可编辑标题\n- 可切换状态\n- 可预览内容\n\n> 后台现在可以同步到 GitHub 仓库。'
   }
 ];
 
 const state = {
-  posts: loadPosts(),
-  selectedId: null
+  posts: [],
+  selectedId: null,
+  config: readConfig(),
+  authenticated: false,
+  remoteSha: null
 };
+
+const loginView = document.getElementById('loginView');
+const adminView = document.getElementById('adminView');
+const loginForm = document.getElementById('loginForm');
+const loginStatus = document.getElementById('loginStatus');
+const tokenInput = document.getElementById('tokenInput');
+const ownerInput = document.getElementById('ownerInput');
+const repoInput = document.getElementById('repoInput');
+const branchInput = document.getElementById('branchInput');
+const pathInput = document.getElementById('pathInput');
+const connectionStatus = document.getElementById('connectionStatus');
+const repoSummary = document.getElementById('repoSummary');
 
 const form = {
   title: document.getElementById('postTitle'),
@@ -40,28 +62,200 @@ const previewLabel = document.getElementById('previewLabel');
 const postList = document.getElementById('postList');
 const listSummary = document.getElementById('listSummary');
 
-function loadPosts() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (!saved) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultPosts));
-    return structuredClone(defaultPosts);
+function readConfig() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? { ...DEFAULT_CONFIG, ...JSON.parse(saved) } : { ...DEFAULT_CONFIG };
+  } catch {
+    return { ...DEFAULT_CONFIG };
   }
+}
+
+function saveConfig() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.config));
+}
+
+function setLoginMessage(message, type = '') {
+  loginStatus.textContent = message;
+  loginStatus.className = 'status-text';
+  if (type) {
+    loginStatus.classList.add(type);
+  }
+}
+
+function hydrateLoginForm() {
+  tokenInput.value = state.config.token || '';
+  ownerInput.value = state.config.owner || DEFAULT_CONFIG.owner;
+  repoInput.value = state.config.repo || DEFAULT_CONFIG.repo;
+  branchInput.value = state.config.branch || DEFAULT_CONFIG.branch;
+  pathInput.value = state.config.path || DEFAULT_CONFIG.path;
+}
+
+function toggleViews() {
+  loginView.classList.toggle('hidden', state.authenticated);
+  adminView.classList.toggle('hidden', !state.authenticated);
+}
+
+function renderConnectionStatus() {
+  const label = state.authenticated ? '已连接' : '未连接';
+  connectionStatus.textContent = label;
+  repoSummary.textContent = `${state.config.owner || 'owner'}/${state.config.repo || 'repo'}`;
+}
+
+function fetchGitHub(endpoint, options = {}) {
+  const headers = {
+    Accept: 'application/vnd.github+json',
+    ...(options.headers || {})
+  };
+
+  if (state.config.token) {
+    headers.Authorization = `token ${state.config.token}`;
+  }
+
+  return fetch(endpoint, {
+    ...options,
+    headers
+  }).then(async (response) => {
+    const text = await response.text();
+    let payload = null;
+    try {
+      payload = text ? JSON.parse(text) : null;
+    } catch {
+      payload = text;
+    }
+
+    if (!response.ok) {
+      const detail = payload && payload.message ? payload.message : 'GitHub API 请求失败';
+      throw new Error(detail);
+    }
+
+    return payload;
+  });
+}
+
+function readFileAsText(fileContent) {
+  const normalized = fileContent.replace(/\n/g, '');
+  return decodeURIComponent(
+    Array.from(atob(normalized), (char) => `%${`00${char.charCodeAt(0).toString(16)}`.slice(-2)}`).join('')
+  );
+}
+
+function encodeBase64(text) {
+  return btoa(unescape(encodeURIComponent(text)));
+}
+
+async function connectToGitHub() {
+  const config = {
+    owner: ownerInput.value.trim(),
+    repo: repoInput.value.trim(),
+    branch: branchInput.value.trim() || 'main',
+    path: pathInput.value.trim() || 'data/posts.json',
+    token: tokenInput.value.trim()
+  };
+
+  if (!config.owner || !config.repo || !config.token) {
+    setLoginMessage('请填写 GitHub Token、仓库所有者和仓库名称。', 'error');
+    return;
+  }
+
+  state.config = config;
+  saveConfig();
+  renderConnectionStatus();
 
   try {
-    const parsed = JSON.parse(saved);
-    return Array.isArray(parsed) && parsed.length ? parsed : defaultPosts;
+    const user = await fetchGitHub('https://api.github.com/user');
+    if (!user || !user.login) {
+      throw new Error('Token 无效，无法获取 GitHub 用户信息。');
+    }
+    state.authenticated = true;
+    setLoginMessage(`已连接到 GitHub 用户：${user.login}。`, 'success');
+    toggleViews();
+    renderConnectionStatus();
+    await loadPostsFromRemote();
   } catch (error) {
-    console.warn('读取文章列表失败，使用默认数据。', error);
-    return structuredClone(defaultPosts);
+    state.authenticated = false;
+    toggleViews();
+    setLoginMessage(`连接失败：${error.message}`, 'error');
+    renderConnectionStatus();
   }
 }
 
-function savePosts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.posts));
+async function ensureRemoteFile() {
+  const filePath = state.config.path;
+  const url = `https://api.github.com/repos/${state.config.owner}/${state.config.repo}/contents/${encodeURIComponent(filePath)}`;
+
+  try {
+    const remote = await fetchGitHub(`${url}?ref=${encodeURIComponent(state.config.branch)}`);
+    state.remoteSha = remote.sha;
+    return remote;
+  } catch (error) {
+    if (error.message.includes('Not Found')) {
+      const payload = {
+        message: 'Initialize blog posts data',
+        content: encodeBase64(JSON.stringify(DEFAULT_POSTS, null, 2)),
+        branch: state.config.branch
+      };
+      const created = await fetchGitHub(`https://api.github.com/repos/${state.config.owner}/${state.config.repo}/contents/${encodeURIComponent(filePath)}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+      state.remoteSha = created.content && created.content.sha ? created.content.sha : null;
+      return created;
+    }
+    throw error;
+  }
 }
 
-function getSelectedPost() {
-  return state.posts.find((post) => post.id === state.selectedId) || null;
+async function loadPostsFromRemote() {
+  try {
+    const remote = await ensureRemoteFile();
+    const remoteContent = remote.content && remote.content.content ? remote.content.content : remote.content;
+    const text = remoteContent && remoteContent.content ? readFileAsText(remoteContent.content) : readFileAsText(remoteContent);
+    const parsed = JSON.parse(text);
+    state.posts = Array.isArray(parsed) ? parsed : DEFAULT_POSTS;
+    state.remoteSha = remote.sha || state.remoteSha;
+    if (!state.posts.length) {
+      state.posts = DEFAULT_POSTS;
+    }
+    renderStats();
+    renderPosts();
+    if (!state.selectedId && state.posts.length) {
+      state.selectedId = state.posts[0].id;
+      populateForm(state.posts[0]);
+    }
+  } catch (error) {
+    state.posts = DEFAULT_POSTS;
+    renderStats();
+    renderPosts();
+    setLoginMessage(`读取远程文章失败：${error.message}`, 'error');
+  }
+}
+
+async function syncPostsToRemote() {
+  if (!state.authenticated) {
+    setLoginMessage('请先连接 GitHub 仓库。', 'error');
+    return;
+  }
+
+  const filePath = state.config.path;
+  const url = `https://api.github.com/repos/${state.config.owner}/${state.config.repo}/contents/${encodeURIComponent(filePath)}`;
+  const payload = {
+    message: 'Update blog posts from admin dashboard',
+    content: encodeBase64(JSON.stringify(state.posts, null, 2)),
+    branch: state.config.branch
+  };
+
+  if (state.remoteSha) {
+    payload.sha = state.remoteSha;
+  }
+
+  const result = await fetchGitHub(`${url}?ref=${encodeURIComponent(state.config.branch)}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload)
+  });
+
+  state.remoteSha = result.content && result.content.sha ? result.content.sha : state.remoteSha;
+  setLoginMessage('文章已成功同步到 GitHub 仓库。', 'success');
 }
 
 function escapeHtml(value = '') {
@@ -79,17 +273,17 @@ function renderMarkdown(markdown = '') {
   const html = [];
   let listBuffer = [];
 
+  const flushParagraph = (paragraphLines) => {
+    if (!paragraphLines.length) return;
+    const text = paragraphLines.join('<br>');
+    html.push(`<p>${text}</p>`);
+  };
+
   const flushList = () => {
     if (listBuffer.length) {
       html.push(`<ul>${listBuffer.map((item) => `<li>${item}</li>`).join('')}</ul>`);
       listBuffer = [];
     }
-  };
-
-  const flushParagraph = (paragraphLines) => {
-    if (!paragraphLines.length) return;
-    const text = paragraphLines.join('<br>');
-    html.push(`<p>${text}</p>`);
   };
 
   let paragraph = [];
@@ -145,11 +339,10 @@ function renderMarkdown(markdown = '') {
 
 function renderPreview() {
   const title = form.title.value.trim();
-  const content = form.content.value.trim();
   const status = form.status.value;
   previewLabel.textContent = status === 'published' ? '已发布' : '草稿';
 
-  if (!title && !content) {
+  if (!title && !form.content.value.trim()) {
     preview.innerHTML = '<p>写点内容后，这里会实时预览。</p>';
     return;
   }
@@ -158,7 +351,7 @@ function renderPreview() {
   const subtitleHtml = form.subtitle.value.trim() ? `<p><strong>${escapeHtml(form.subtitle.value.trim())}</strong></p>` : '';
   const categoryHtml = form.category.value.trim() ? `<p><small>分类：${escapeHtml(form.category.value.trim())}</small></p>` : '';
   const dateHtml = form.date.value ? `<p><small>日期：${escapeHtml(form.date.value)}</small></p>` : '';
-  preview.innerHTML = `${titleHtml}${subtitleHtml}${categoryHtml}${dateHtml}${renderMarkdown(content)}`;
+  preview.innerHTML = `${titleHtml}${subtitleHtml}${categoryHtml}${dateHtml}${renderMarkdown(form.content.value.trim())}`;
 }
 
 function renderStats() {
@@ -233,12 +426,12 @@ function resetForm() {
   renderPreview();
 }
 
-function saveCurrentPost() {
+async function saveCurrentPost() {
   const title = form.title.value.trim();
   const content = form.content.value.trim();
 
   if (!title || !content) {
-    alert('标题和正文不能为空。');
+    setLoginMessage('标题和正文不能为空。', 'error');
     return;
   }
 
@@ -260,10 +453,15 @@ function saveCurrentPost() {
     state.selectedId = payload.id;
   }
 
-  savePosts();
   renderStats();
   renderPosts();
   populateForm(payload);
+
+  try {
+    await syncPostsToRemote();
+  } catch (error) {
+    setLoginMessage(`保存失败：${error.message}`, 'error');
+  }
 }
 
 function togglePostStatus(id) {
@@ -271,14 +469,15 @@ function togglePostStatus(id) {
     if (post.id !== id) return post;
     return { ...post, status: post.status === 'published' ? 'draft' : 'published' };
   });
-  savePosts();
-  renderStats();
-  renderPosts();
 
-  const selected = getSelectedPost();
+  const selected = state.posts.find((post) => post.id === state.selectedId);
   if (selected) {
     populateForm(selected);
   }
+
+  renderStats();
+  renderPosts();
+  syncPostsToRemote().catch((error) => setLoginMessage(`状态更新失败：${error.message}`, 'error'));
 }
 
 function deletePost(id) {
@@ -289,13 +488,14 @@ function deletePost(id) {
   if (!confirmed) return;
 
   state.posts = state.posts.filter((post) => post.id !== id);
-  savePosts();
   renderStats();
   renderPosts();
 
   if (state.selectedId === id) {
     resetForm();
   }
+
+  syncPostsToRemote().catch((error) => setLoginMessage(`删除失败：${error.message}`, 'error'));
 }
 
 function bindPostListEvents() {
@@ -325,7 +525,28 @@ function bindPostListEvents() {
   });
 }
 
+function logout() {
+  state.authenticated = false;
+  state.remoteSha = null;
+  state.posts = DEFAULT_POSTS;
+  state.selectedId = null;
+  tokenInput.value = '';
+  state.config = { ...DEFAULT_CONFIG };
+  saveConfig();
+  toggleViews();
+  renderConnectionStatus();
+  populateForm(DEFAULT_POSTS[0]);
+  renderStats();
+  renderPosts();
+  setLoginMessage('已退出登录。请重新输入 GitHub Token 继续。', 'success');
+}
+
 function initEvents() {
+  loginForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    connectToGitHub();
+  });
+
   Object.values(form).forEach((field) => {
     field.addEventListener('input', renderPreview);
     field.addEventListener('change', renderPreview);
@@ -334,18 +555,35 @@ function initEvents() {
   document.getElementById('saveBtn').addEventListener('click', saveCurrentPost);
   document.getElementById('newPostBtn').addEventListener('click', resetForm);
   document.getElementById('resetFormBtn').addEventListener('click', resetForm);
+  document.getElementById('syncBtn').addEventListener('click', () => {
+    syncPostsToRemote().catch((error) => setLoginMessage(`同步失败：${error.message}`, 'error'));
+  });
+  document.getElementById('logoutBtn').addEventListener('click', logout);
   bindPostListEvents();
 }
 
-function init() {
-  form.date.value = new Date().toISOString().slice(0, 10);
+async function init() {
+  hydrateLoginForm();
+  renderConnectionStatus();
   renderStats();
+  state.posts = DEFAULT_POSTS;
   renderPosts();
-  populateForm(state.posts[0] || null);
-  if (state.posts[0]) {
-    state.selectedId = state.posts[0].id;
-  }
+  populateForm(DEFAULT_POSTS[0]);
+  state.selectedId = DEFAULT_POSTS[0].id;
   initEvents();
+
+  if (state.config.token) {
+    state.authenticated = true;
+    toggleViews();
+    renderConnectionStatus();
+    try {
+      await loadPostsFromRemote();
+    } catch (error) {
+      setLoginMessage(`初始化失败：${error.message}`, 'error');
+    }
+  } else {
+    toggleViews();
+  }
 }
 
 init();
