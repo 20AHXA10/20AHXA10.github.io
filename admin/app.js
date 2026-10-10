@@ -103,13 +103,14 @@ function renderConnectionStatus() {
 }
 
 function fetchGitHub(endpoint, options = {}) {
+  endpoint = endpoint.replace('https://api.github.com', 'https://github-api-proxy.255693979.workers.dev');
   const headers = {
     Accept: 'application/vnd.github+json',
     ...(options.headers || {})
   };
 
   if (state.config.token) {
-    headers.Authorization = `token ${state.config.token}`;
+    headers.Authorization = `Bearer ${state.config.token}`;
   }
 
   return fetch(endpoint, {
