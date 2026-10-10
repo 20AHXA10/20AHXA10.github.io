@@ -25,5 +25,13 @@
     "status": "published",
     "date": "2026-08-10",
     "content": "## 后台发布测试文章\n\n这篇文章用于验证：\n\n- 后台保存到 GitHub\n- 主站读取 /data/posts.json\n- 前端渲染列表和详情\n\n**结果：**页面会从 JSON 数据源读取并展示该文章。"
+  },
+  {
+  "id": "3",
+  "title": "我的新文章",
+  "category": "未分类",
+  "date": "2026-10-10",
+  "status": "published",
+  "content": "这是文章正文，支持 Markdown 语法。"
   }
 ]
