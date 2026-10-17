@@ -155,7 +155,7 @@ function renderDetail(post) {
         ${post.subtitle ? `<h2 class="article-subtitle">${escapeHtml(post.subtitle)}</h2>` : ''}
         <p class="article-time--published">${escapeHtml(formatDate(post.date))}</p>
       </div>
-      <div class="blog-content">${renderInlineMarkdown(post.content || '')}</div>
+      <div class="blog-content"><div class="article-content">${renderInlineMarkdown(post.content || '')}</div></div>
     </article>
   `;
 }
